@@ -1,2 +1,2 @@
-pub const AUTH: &str = "";
+pub const COOKIE: &str = "";
 pub const URL: &str = "";

@@ -7,7 +7,7 @@ pub async fn request_estimate() -> Result<String, reqwest::Error> {
     let cli: reqwest::Client = reqwest::Client::new();
     let resp: String = cli
         .request(Method::GET, credentials::URL)
-        .bearer_auth(credentials::AUTH)
+        .header("Cookie", credentials::COOKIE)
         .send()
         .await?
         .text()
