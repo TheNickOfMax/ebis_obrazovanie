@@ -48,8 +48,7 @@ pub async fn request_current_year_id(student_id: &str) -> Result<String, reqwest
 
     // This shit is unsafe as fuck
     Ok(
-        json::parse(req(url.as_str(), credentials::COOKIE).await?.as_str()).unwrap()["currentYear"]
-            ["id"]
+        json::parse(req(&url, credentials::COOKIE).await?.as_str()).unwrap()["currentYear"]["id"]
             .as_str()
             .unwrap_or_default()
             .to_string(),
@@ -94,8 +93,8 @@ pub async fn request_current_calss_id(
 
     // This shit is unsafe as fuck
     Ok(
-        json::parse(req(url.as_str(), credentials::COOKIE).await?.as_str()).unwrap()
-            ["currentClass"]["value"]
+        json::parse(req(&url, credentials::COOKIE).await?.as_str()).unwrap()["currentClass"]
+            ["value"]
             .as_str()
             .unwrap_or_default()
             .to_string(),
