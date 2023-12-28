@@ -3,7 +3,7 @@ use ebis_api::{
     requests::{request_current_calss_id, request_discipline_table, request_period_ids},
 };
 
-use crate::ebis_lib::diary::{Discipline, Lesson};
+use crate::ebis_lib::diary::{Discipline, Lesson, Periods};
 
 mod ebis_api;
 mod ebis_lib;
@@ -22,7 +22,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let period = periods
         .iter()
-        .find(|p| p.0 == "2 Четверть")
+        .find(|p| p.0 == Periods::Term2.as_str())
         .unwrap()
         .1
         .clone();

@@ -1,5 +1,27 @@
 use std::{fmt::Debug, str::FromStr};
 
+pub enum Periods {
+    Week,
+    Finals,
+    Term1,
+    Term2,
+    Term3,
+    Term4,
+}
+
+impl Periods {
+    pub fn as_str(&self) -> &str {
+        match self {
+            Periods::Week => "Текущая неделя",
+            Periods::Finals => "Итоговые оценки",
+            Periods::Term1 => "1 Четверть",
+            Periods::Term2 => "2 Четверть",
+            Periods::Term3 => "3 Четверть",
+            Periods::Term4 => "4 Четверть",
+        }
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct Discipline {
     pub name: String,
