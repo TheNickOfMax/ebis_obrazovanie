@@ -5,8 +5,6 @@ use crate::{
 };
 use reqwest::Method;
 
-// all of this is really fucked up and badly needs refactoring
-
 pub async fn req(url: &str, cookie: &str) -> Result<String, reqwest::Error> {
     let cli: reqwest::Client = reqwest::Client::new();
     Ok(cli
