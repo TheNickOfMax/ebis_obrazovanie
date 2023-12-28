@@ -1,0 +1,19 @@
+{
+    "periodGradesTable": {
+        "disciplines": [
+            {
+                "name": "Алгебра",
+                "totalGrade": "4",
+                "grades": [
+                    {
+                        "lessonId": "716b1b7c-47e7-4fc5-bd71-37d847baf624",
+                        "date": "2023-11-06T00:00:00.000+05:00",
+                        "grades": [[
+                                "5"
+                            ]]
+                    }
+                ]
+            }
+        ]
+    }
+}
