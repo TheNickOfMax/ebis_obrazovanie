@@ -1,8 +1,5 @@
 use crate::diary_structs::{Discipline, Lesson};
 
-use json::JsonValue;
-use std::error::Error;
-
 mod api;
 mod credentials;
 mod diary_structs;
@@ -10,17 +7,28 @@ mod from_json;
 mod json_conversions;
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // get the api responce
-    let response: String = api::req().await?;
+    let response: String = api::request_estimate().await?;
 
     // parse responce json
-    let response_json: JsonValue = json::parse(&response)?;
+    let response_json: json::JsonValue = json::parse(&response)?;
 
     // convert it to my types
-    let disciplines: Vec<Discipline> = json_conversions::api_json_to_usable_vec(response_json);
+    let descipline_table: Vec<Discipline> = json_conversions::api_json_to_usable_vec(response_json);
 
     // profit
-    println!("{:#?}", disciplines);
+    println!(
+        "{:#?}",
+        descipline_table
+            .iter()
+            .map(|d| (
+                d.name.clone(),
+                d.to_grades::<i8>(),
+                d.estimate_grade(),
+                d.total_grade.parse::<i8>().unwrap().clone()
+            ))
+            .collect::<Vec<(String, Vec<i8>, f32, i8)>>()
+    );
     Ok(())
 }
