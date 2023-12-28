@@ -1,4 +1,4 @@
-use crate::credentials;
+use crate::ebis_api::credentials;
 
 use reqwest::Method;
 

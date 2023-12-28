@@ -1,11 +1,11 @@
 use json::JsonValue;
 
 use crate::{
-    diary_structs::{Discipline, Lesson},
-    from_json::FromJson,
+    ebis_lib::diary::{Discipline, Lesson},
+    json_utils::from_json_trait::FromJson,
 };
 
-pub fn api_json_to_usable_vec(api_json: JsonValue) -> Vec<Discipline> {
+pub fn api_json_to_ebis_structs(api_json: JsonValue) -> Vec<Discipline> {
     // leave only the disciplines
     let json_disciplines: Vec<JsonValue> =
         Vec::from_json_array(api_json["periodGradesTable"]["disciplines"].clone());

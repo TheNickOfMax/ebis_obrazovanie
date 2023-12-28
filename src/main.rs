@@ -1,21 +1,20 @@
-use crate::diary_structs::{Discipline, Lesson};
+use crate::ebis_lib::diary::{Discipline, Lesson};
 
-mod api;
-mod credentials;
-mod diary_structs;
-mod from_json;
-mod json_conversions;
+mod ebis_api;
+mod ebis_lib;
+mod json_utils;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // get the api responce
-    let response: String = api::request_estimate().await?;
+    let response: String = ebis_api::requests::request_estimate().await?;
 
     // parse responce json
     let response_json: json::JsonValue = json::parse(&response)?;
 
     // convert it to my types
-    let descipline_table: Vec<Discipline> = json_conversions::api_json_to_usable_vec(response_json);
+    let descipline_table: Vec<Discipline> =
+        json_utils::conversions::api_json_to_ebis_structs(response_json);
 
     // leave only necesarry data
     let pretty_table: Vec<(String, Vec<i8>, f32, i8)> = descipline_table
