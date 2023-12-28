@@ -22,7 +22,7 @@ pub async fn req(url: &str, cookie: &str) -> Result<String, reqwest::Error> {
         .await?)
 }
 
-pub async fn request_discipline_table(
+pub async fn request_lessons_table(
     year_id: &str,
     class_id: &str,
     period_id: &str,

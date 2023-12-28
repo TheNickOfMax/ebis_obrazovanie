@@ -1,6 +1,6 @@
 use ebis_api::{
     credentials,
-    requests::{request_current_calss_id, request_discipline_table, request_period_ids},
+    requests::{request_current_calss_id, request_lessons_table, request_period_ids},
 };
 
 use crate::ebis_lib::diary::{Discipline, Lesson, Periods};
@@ -27,7 +27,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .1
         .clone();
 
-    let table = request_discipline_table(&year, &class, &period, credentials::STUDENT_ID).await?;
+    let table = request_lessons_table(&year, &class, &period, credentials::STUDENT_ID).await?;
     println!("{:#?}", table);
     Ok(())
 }
