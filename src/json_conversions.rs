@@ -39,7 +39,10 @@ pub fn json_value_to_lesson(lesson: &JsonValue) -> Lesson {
     Lesson {
         lesson_id: lesson["lessonId"].as_str().unwrap_or_default().to_string(),
         date: lesson["date"].as_str().unwrap_or_default().to_string(),
-        grades: json_array_to_grade_vec(&lesson["grades"].clone()),
+        grades: json_array_to_grade_vec(&lesson["grades"].clone())
+            .into_iter()
+            .flatten()
+            .collect(),
     }
 }
 
