@@ -9,7 +9,7 @@ impl FromJson<String> for Vec<String> {
         value
             .members()
             .map(|s| s.as_str().unwrap_or_default().to_string())
-            .collect::<Vec<String>>()
+            .collect()
     }
 }
 
@@ -18,16 +18,13 @@ impl FromJson<i32> for Vec<i32> {
         value
             .members()
             .map(|s| s.as_i32().unwrap_or_default())
-            .collect::<Vec<i32>>()
+            .collect()
     }
 }
 
 impl FromJson<JsonValue> for Vec<JsonValue> {
     fn from_json_array(value: JsonValue) -> Vec<JsonValue> {
-        value
-            .members()
-            .map(|j| j.to_owned())
-            .collect::<Vec<JsonValue>>()
+        value.members().map(|j| j.to_owned()).collect()
     }
 }
 
