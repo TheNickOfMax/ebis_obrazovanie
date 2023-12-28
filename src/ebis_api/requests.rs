@@ -41,10 +41,7 @@ pub async fn request_lessons_table(
 pub async fn request_current_year_id(student_id: &str) -> Result<String, reqwest::Error> {
     let s = student_id;
 
-    let url = format!(
-        "https://dnevnik.egov66.ru/api/estimate/years?studentId={}",
-        s
-    );
+    let url = format!("https://dnevnik.egov66.ru/api/estimate/years?studentId={s}");
 
     // This shit is unsafe as fuck
     Ok(
@@ -86,10 +83,7 @@ pub async fn request_current_calss_id(
     let s = student_id;
     let y = year_id;
 
-    let url = format!(
-        "https://dnevnik.egov66.ru/api/classes?studentId={}&schoolYear={}",
-        s, y
-    );
+    let url = format!("https://dnevnik.egov66.ru/api/classes?studentId={s}&schoolYear={y}");
 
     // This shit is unsafe as fuck
     Ok(
