@@ -1,3 +1,8 @@
+use ebis_api::{
+    credentials,
+    requests::{request_current_calss_id, request_discipline_table, request_period_ids},
+};
+
 use crate::ebis_lib::diary::{Discipline, Lesson};
 
 mod ebis_api;
@@ -6,32 +11,23 @@ mod json_utils;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // get the api responce
-    let response: String = ebis_api::requests::request_estimate().await?;
+    let year = ebis_api::requests::request_current_year_id(credentials::STUDENT_ID).await?;
+    println!("{}", year);
 
-    // parse responce json
-    let response_json: json::JsonValue = json::parse(&response)?;
+    let class = request_current_calss_id(credentials::STUDENT_ID, &year).await?;
+    println!("{}", class);
 
-    // convert it to my types
-    let descipline_table: Vec<Discipline> =
-        json_utils::conversions::api_json_to_ebis_structs(response_json);
+    let periods = request_period_ids(credentials::STUDENT_ID, &year, &class).await?;
+    println!("{:#?}", periods);
 
-    // leave only necesarry data
-    let pretty_table: Vec<(String, Vec<i8>, f32, i8)> = descipline_table
+    let period = periods
         .iter()
-        .map(|d| {
-            (
-                d.name.clone(),
-                d.to_grades::<i8>(),
-                d.estimate_grade(),
-                d.total_grade.parse::<i8>().unwrap_or_default().clone(),
-            )
-        })
-        .collect();
+        .find(|p| p.0 == "2 Четверть")
+        .unwrap()
+        .1
+        .clone();
 
-    // profit
-    for p in pretty_table {
-        println!("{:?}", p);
-    }
+    let table = request_discipline_table(&year, &class, &period, credentials::STUDENT_ID).await?;
+    println!("{:#?}", table);
     Ok(())
 }

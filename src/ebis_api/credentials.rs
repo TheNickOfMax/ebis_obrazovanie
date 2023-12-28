@@ -1,2 +1,2 @@
 pub const COOKIE: &str = "";
-pub const URL: &str = "";
+pub const STUDENT_ID: &str = "";
