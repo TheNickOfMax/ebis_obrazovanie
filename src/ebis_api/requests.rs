@@ -1,10 +1,8 @@
 use crate::{
     ebis_api::credentials,
     ebis_lib::diary::{Discipline, Error},
-    json_utils::{conversions::api_json_to_ebis_structs, from_json_trait::FromJson},
+    json_utils::conversions::api_json_to_ebis_structs,
 };
-
-use json::JsonValue;
 use reqwest::Method;
 
 // all of this is really fucked up and badly needs refactoring

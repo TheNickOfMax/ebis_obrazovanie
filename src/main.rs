@@ -1,6 +1,6 @@
 use ebis_api::{
     credentials,
-    requests::{self, request_current_calss_id, request_lessons_table, request_period_ids},
+    requests::{request_current_calss_id, request_lessons_table, request_period_ids},
 };
 
 use crate::ebis_lib::diary::{Discipline, Lesson, Periods};
