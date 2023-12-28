@@ -1,6 +1,6 @@
 use ebis_api::{
     credentials,
-    requests::{request_current_calss_id, request_lessons_table, request_period_ids},
+    requests::{self, request_current_calss_id, request_lessons_table, request_period_ids},
 };
 
 use crate::ebis_lib::diary::{Discipline, Lesson, Periods};
@@ -10,7 +10,7 @@ mod ebis_lib;
 mod json_utils;
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+async fn main() -> Result<(), ebis_lib::diary::Error> {
     let year = ebis_api::requests::request_current_year_id(credentials::STUDENT_ID).await?;
     println!("{}", year);
 

@@ -1,5 +1,10 @@
 use std::{fmt::Debug, str::FromStr};
 
+#[derive(Debug)]
+pub enum Error {
+    ReqError(reqwest::Error),
+    ParsingError(json::Error),
+}
 pub enum Periods {
     Week,
     Finals,
