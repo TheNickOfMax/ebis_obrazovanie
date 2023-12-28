@@ -91,8 +91,8 @@ pub async fn request_period_ids(
         Err(err) => return Err(Error::ParsingError(err)),
     };
 
-    Ok(Vec::<JsonValue>::from_json_array(parsed["periods"].clone())
-        .iter()
+    Ok(parsed["periods"]
+        .members()
         .map(|p| {
             (
                 p["name"].as_str().unwrap_or_default().to_string(),
@@ -118,8 +118,13 @@ pub async fn request_current_calss_id(student_id: &str, year_id: &str) -> Result
         Err(err) => return Err(Error::ParsingError(err)),
     };
 
-    Ok(parsed["currentClass"]["value"]
-        .as_str()
-        .unwrap_or_default()
-        .to_string())
+    let json_value = match parsed["currentClass"]["value"].as_str() {
+        Some(parsed_value) => parsed_value,
+        None => {
+            return Err(Error::ParsingError(json::Error::WrongType(
+                "None".to_string(),
+            )))
+        }
+    };
+    Ok(json_value.to_string())
 }
