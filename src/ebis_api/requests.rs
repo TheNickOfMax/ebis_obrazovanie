@@ -1,6 +1,6 @@
 use crate::{
     ebis_api::credentials,
-    ebis_lib::diary::{Discipline, Error},
+    ebis_lib::{diary::Discipline, errors::ParseOrReqError},
     json_utils::conversions::api_json_to_ebis_structs,
 };
 use reqwest::Method;
@@ -21,7 +21,7 @@ pub async fn request_lessons_table(
     class_id: &str,
     period_id: &str,
     student_id: &str,
-) -> Result<Vec<Discipline>, Error> {
+) -> Result<Vec<Discipline>, ParseOrReqError> {
     let y = year_id;
     let c = class_id;
     let p = period_id;
@@ -31,30 +31,30 @@ pub async fn request_lessons_table(
 
     let resp = match req(&url, credentials::COOKIE).await {
         Ok(response) => response,
-        Err(err) => return Err(Error::ReqError(err.without_url())),
+        Err(err) => return Err(ParseOrReqError::ReqError(err.without_url())),
     };
 
     let parsed = match json::parse(&resp) {
         Ok(parsed_json) => parsed_json,
-        Err(err) => return Err(Error::ParsingError(err)),
+        Err(err) => return Err(ParseOrReqError::ParsingError(err)),
     };
 
     Ok(api_json_to_ebis_structs(parsed))
 }
 
-pub async fn request_current_year_id(student_id: &str) -> Result<String, Error> {
+pub async fn request_current_year_id(student_id: &str) -> Result<String, ParseOrReqError> {
     let s = student_id;
 
     let url = format!("https://dnevnik.egov66.ru/api/estimate/years?studentId={s}");
 
     let resp = match req(&url, credentials::COOKIE).await {
         Ok(response) => response,
-        Err(err) => return Err(Error::ReqError(err.without_url())),
+        Err(err) => return Err(ParseOrReqError::ReqError(err.without_url())),
     };
 
     let parsed = match json::parse(&resp) {
         Ok(parsed_json) => parsed_json,
-        Err(err) => return Err(Error::ParsingError(err)),
+        Err(err) => return Err(ParseOrReqError::ParsingError(err)),
     };
 
     Ok(parsed["currentYear"]["id"]
@@ -68,7 +68,7 @@ pub async fn request_period_ids(
     student_id: &str,
     year_id: &str,
     class_id: &str,
-) -> Result<Vec<(String, String)>, Error> {
+) -> Result<Vec<(String, String)>, ParseOrReqError> {
     let s = student_id;
     let y = year_id;
     let c = class_id;
@@ -79,12 +79,12 @@ pub async fn request_period_ids(
 
     let resp = match req(&url, credentials::COOKIE).await {
         Ok(response) => response,
-        Err(err) => return Err(Error::ReqError(err.without_url())),
+        Err(err) => return Err(ParseOrReqError::ReqError(err.without_url())),
     };
 
     let parsed = match json::parse(&resp) {
         Ok(parsed_json) => parsed_json,
-        Err(err) => return Err(Error::ParsingError(err)),
+        Err(err) => return Err(ParseOrReqError::ParsingError(err)),
     };
 
     Ok(parsed["periods"]
@@ -98,7 +98,10 @@ pub async fn request_period_ids(
         .collect())
 }
 
-pub async fn request_current_calss_id(student_id: &str, year_id: &str) -> Result<String, Error> {
+pub async fn request_current_calss_id(
+    student_id: &str,
+    year_id: &str,
+) -> Result<String, ParseOrReqError> {
     let s = student_id;
     let y = year_id;
 
@@ -106,18 +109,18 @@ pub async fn request_current_calss_id(student_id: &str, year_id: &str) -> Result
 
     let resp = match req(&url, credentials::COOKIE).await {
         Ok(response) => response,
-        Err(err) => return Err(Error::ReqError(err.without_url())),
+        Err(err) => return Err(ParseOrReqError::ReqError(err.without_url())),
     };
 
     let parsed = match json::parse(&resp) {
         Ok(parsed_json) => parsed_json,
-        Err(err) => return Err(Error::ParsingError(err)),
+        Err(err) => return Err(ParseOrReqError::ParsingError(err)),
     };
 
     let json_value = match parsed["currentClass"]["value"].as_str() {
         Some(parsed_value) => parsed_value,
         None => {
-            return Err(Error::ParsingError(json::Error::WrongType(
+            return Err(ParseOrReqError::ParsingError(json::Error::WrongType(
                 "None".to_string(),
             )))
         }
