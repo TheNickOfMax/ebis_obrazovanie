@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 pub async fn gos_login_token(login: &str, password: &str) -> Result<String, reqwest::Error> {
     let req_body = format!("{{\"login\":\"{login}\",\"password\":\"{password}\"}}");
 
@@ -10,15 +8,19 @@ pub async fn gos_login_token(login: &str, password: &str) -> Result<String, reqw
         .body(req_body)
         .send();
 
-    let resp = req.await?.text().await?;
+    // I have no fucking idea why this shit doesnt return the url i want
 
-    let redirect_url = json::parse(&resp).unwrap()["redirect_url"]
+    let resp = req.await?;
+
+    let resp_text = resp.text().await?;
+
+    let redirect_url = json::parse(&resp_text).unwrap()["redirect_url"]
         .as_str()
         .unwrap_or_default()
         .to_string();
 
     let token = &redirect_url.as_str()[redirect_url.find("code=").unwrap_or_default()
-        ..redirect_url.find("&").unwrap_or_default()];
+        ..redirect_url.find("&").unwrap_or_default()]; // for the good case, but i cant get it for some fucking reason
 
-    Ok(resp.to_string())
+    Ok(resp_text.to_string())
 }
