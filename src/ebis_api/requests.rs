@@ -1,9 +1,9 @@
-use json::JsonValue;
-
 use crate::{
     ebis_lib::{diary::Discipline, errors::ParseOrReqError},
     json_utils::{conversions::api_json_to_ebis_structs, from_json_trait::FromJson},
 };
+
+use json::JsonValue;
 
 pub async fn bear_req(url: &str, token: &str) -> Result<String, reqwest::Error> {
     let cli: reqwest::Client = reqwest::Client::new();

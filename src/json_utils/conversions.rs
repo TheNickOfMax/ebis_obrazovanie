@@ -1,9 +1,9 @@
-use json::JsonValue;
-
 use crate::{
     ebis_lib::diary::{Discipline, Lesson},
     json_utils::from_json_trait::FromJson,
 };
+
+use json::JsonValue;
 
 pub fn api_json_to_ebis_structs(api_json: JsonValue) -> Vec<Discipline> {
     // leave only the disciplines

@@ -3,7 +3,7 @@ use ebis_api::requests::{
 };
 use ebis_lib::errors::ParseOrReqError;
 
-use crate::ebis_lib::diary::{Discipline, Lesson, Periods};
+use crate::ebis_lib::diary::Periods;
 
 mod ebis_api;
 mod ebis_lib;

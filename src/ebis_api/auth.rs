@@ -1,6 +1,6 @@
-use reqwest::Client;
-
 use crate::ebis_lib::errors::ParseOrReqError;
+
+use reqwest::Client;
 
 /// Logs into the provided gosuslugi acount and gets a user's bearer roken for dnevnik
 pub async fn gos_login(login: &str, password: &str) -> Result<String, ParseOrReqError> {
