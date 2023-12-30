@@ -16,13 +16,10 @@ async fn main() -> Result<(), ParseOrReqError> {
     let id = student_id(&bearer).await?;
 
     let year = current_year_id(&id, &bearer).await?;
-    println!("{}", year);
 
     let class = current_calss_id(&id, &year, &bearer).await?;
-    println!("{}", class);
 
     let periods = period_ids(&id, &year, &class, &bearer).await?;
-    println!("{:#?}", periods);
 
     let period = periods
         .iter()
