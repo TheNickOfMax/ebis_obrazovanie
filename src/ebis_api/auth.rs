@@ -1,5 +1,9 @@
-/// Logs into the provided gosuslugi acount and gets a user's auth code
-pub async fn gos_login_code(login: &str, password: &str) -> Result<String, reqwest::Error> {
+use reqwest::Client;
+
+use crate::ebis_lib::errors::ParseOrReqError;
+
+/// Logs into the provided gosuslugi acount and gets a user's bearer roken for dnevnik
+pub async fn gos_login(login: &str, password: &str) -> Result<String, ParseOrReqError> {
     let login_body = format!("{{\"login\":\"{login}\",\"password\":\"{password}\"}}");
 
     let cli: reqwest::Client = reqwest::Client::builder().cookie_store(true).build()?;
@@ -30,6 +34,42 @@ pub async fn gos_login_code(login: &str, password: &str) -> Result<String, reqwe
     let code = &code_url[code_url.rfind("code=").unwrap() + 5..]
         .to_string()
         .replace("%3d", "=");
+    let _fin = cli.get(code_url).send().await?;
 
-    Ok(code.to_string())
+    Ok(bearer_from_code(cli, code).await?)
+}
+
+/// Gets the bearer token with the stupid code. Don't question it
+pub async fn bearer_from_code(cli: Client, auth_code: &str) -> Result<String, ParseOrReqError> {
+    let req_body = format!(
+        "{{\"authorizationCode\":\"{auth_code}\",\"redirectUrl\":\"https://dnevnik.egov66.ru/\"}}"
+    );
+
+    let req = cli
+        .post("https://dnevnik.egov66.ru/api/auth/Token")
+        .body(req_body.clone())
+        .header("Content-Type", "application/json")
+        .send();
+    let resp = req.await?;
+
+    let resp_text = resp.text().await?;
+
+    let resp_json = match json::parse(&resp_text) {
+        Ok(jsn) => jsn,
+        Err(err) => {
+            println!("{resp_text}");
+            return Err(err.into());
+        }
+    };
+
+    let token = match resp_json["accessToken"].as_str() {
+        Some(t) => t.to_string(),
+        None => {
+            return Err(ParseOrReqError::ParsingError(json::Error::wrong_type(
+                "str",
+            )))
+        }
+    };
+
+    Ok(token)
 }
