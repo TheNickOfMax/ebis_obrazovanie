@@ -1,6 +1,6 @@
 use ebis_api::{
     credentials,
-    requests::{request_current_calss_id, request_lessons_table, request_period_ids},
+    requests::{current_calss_id, lessons_table, period_ids},
 };
 use ebis_lib::errors::ParseOrReqError;
 
@@ -14,14 +14,13 @@ mod json_utils;
 async fn main() -> Result<(), ParseOrReqError> {
     let bearer = ebis_api::auth::gos_login("", "").await?;
 
-    let year =
-        ebis_api::requests::request_current_year_id(credentials::STUDENT_ID, &bearer).await?;
+    let year = ebis_api::requests::current_year_id(credentials::STUDENT_ID, &bearer).await?;
     println!("{}", year);
 
-    let class = request_current_calss_id(credentials::STUDENT_ID, &year, &bearer).await?;
+    let class = current_calss_id(credentials::STUDENT_ID, &year, &bearer).await?;
     println!("{}", class);
 
-    let periods = request_period_ids(credentials::STUDENT_ID, &year, &class, &bearer).await?;
+    let periods = period_ids(credentials::STUDENT_ID, &year, &class, &bearer).await?;
     println!("{:#?}", periods);
 
     let period = periods
@@ -31,8 +30,7 @@ async fn main() -> Result<(), ParseOrReqError> {
         .1
         .clone();
 
-    let table =
-        request_lessons_table(&year, &class, &period, credentials::STUDENT_ID, &bearer).await?;
+    let table = lessons_table(&year, &class, &period, credentials::STUDENT_ID, &bearer).await?;
 
     let pretty: Vec<(String, Vec<i8>, f32, String)> = table
         .iter()

@@ -8,7 +8,7 @@ pub async fn bear_req(url: &str, token: &str) -> Result<String, reqwest::Error> 
     Ok(cli.get(url).bearer_auth(token).send().await?.text().await?)
 }
 
-pub async fn request_lessons_table(
+pub async fn lessons_table(
     year_id: &str,
     class_id: &str,
     period_id: &str,
@@ -35,10 +35,7 @@ pub async fn request_lessons_table(
     Ok(api_json_to_ebis_structs(parsed))
 }
 
-pub async fn request_current_year_id(
-    student_id: &str,
-    token: &str,
-) -> Result<String, ParseOrReqError> {
+pub async fn current_year_id(student_id: &str, token: &str) -> Result<String, ParseOrReqError> {
     let s = student_id;
 
     let url = format!("https://dnevnik.egov66.ru/api/estimate/years?studentId={s}");
@@ -60,7 +57,7 @@ pub async fn request_current_year_id(
 }
 
 //returns in format Vec<(name, id)>
-pub async fn request_period_ids(
+pub async fn period_ids(
     student_id: &str,
     year_id: &str,
     class_id: &str,
@@ -95,7 +92,7 @@ pub async fn request_period_ids(
         .collect())
 }
 
-pub async fn request_current_calss_id(
+pub async fn current_calss_id(
     student_id: &str,
     year_id: &str,
     token: &str,
