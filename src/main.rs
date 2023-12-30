@@ -46,7 +46,7 @@ async fn main() -> Result<(), ParseOrReqError> {
         })
         .collect();
 
-    println!("{:#?}", pretty);
+    pretty.iter().for_each(|p| println!("{:?}", p));
 
     Ok(())
 }

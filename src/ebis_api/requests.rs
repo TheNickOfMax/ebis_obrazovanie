@@ -1,9 +1,7 @@
 use crate::{
-    ebis_api::credentials,
     ebis_lib::{diary::Discipline, errors::ParseOrReqError},
     json_utils::conversions::api_json_to_ebis_structs,
 };
-use reqwest::Method;
 
 pub async fn bear_req(url: &str, token: &str) -> Result<String, reqwest::Error> {
     let cli: reqwest::Client = reqwest::Client::new();
