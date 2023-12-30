@@ -34,6 +34,8 @@ pub async fn gos_login(login: &str, password: &str) -> Result<String, ParseOrReq
     let code = &code_url[code_url.rfind("code=").unwrap() + 5..]
         .to_string()
         .replace("%3d", "=");
+
+    // Finish login process
     let _fin = cli.get(code_url).send().await?;
 
     Ok(bearer_from_code(cli, code).await?)
