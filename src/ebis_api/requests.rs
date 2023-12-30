@@ -1,6 +1,8 @@
+use json::JsonValue;
+
 use crate::{
     ebis_lib::{diary::Discipline, errors::ParseOrReqError},
-    json_utils::conversions::api_json_to_ebis_structs,
+    json_utils::{conversions::api_json_to_ebis_structs, from_json_trait::FromJson},
 };
 
 pub async fn bear_req(url: &str, token: &str) -> Result<String, reqwest::Error> {
@@ -121,4 +123,29 @@ pub async fn current_calss_id(
         }
     };
     Ok(json_value.to_string())
+}
+
+pub async fn student_id(token: &str) -> Result<String, ParseOrReqError> {
+    let url = "https://dnevnik.egov66.ru/api/students";
+
+    let resp = match bear_req(url, token).await {
+        Ok(response) => response,
+        Err(err) => return Err(ParseOrReqError::ReqError(err)),
+    };
+
+    let parsed = match json::parse(&resp) {
+        Ok(parsed_json) => parsed_json,
+        Err(err) => return Err(ParseOrReqError::ParsingError(err)),
+    };
+
+    let student = &Vec::<JsonValue>::from_json_array(parsed["students"].clone())[0];
+    let id = match student["id"].as_str() {
+        Some(parsed_value) => parsed_value,
+        None => {
+            return Err(ParseOrReqError::ParsingError(json::Error::WrongType(
+                "str".to_string(),
+            )))
+        }
+    };
+    Ok(id.to_string())
 }
