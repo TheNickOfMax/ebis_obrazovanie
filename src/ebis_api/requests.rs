@@ -5,15 +5,9 @@ use crate::{
 };
 use reqwest::Method;
 
-pub async fn req(url: &str, cookie: &str) -> Result<String, reqwest::Error> {
+pub async fn bear_req(url: &str, token: &str) -> Result<String, reqwest::Error> {
     let cli: reqwest::Client = reqwest::Client::new();
-    Ok(cli
-        .request(Method::GET, url)
-        .header("Cookie", cookie)
-        .send()
-        .await?
-        .text()
-        .await?)
+    Ok(cli.get(url).bearer_auth(token).send().await?.text().await?)
 }
 
 pub async fn request_lessons_table(
@@ -21,6 +15,7 @@ pub async fn request_lessons_table(
     class_id: &str,
     period_id: &str,
     student_id: &str,
+    token: &str,
 ) -> Result<Vec<Discipline>, ParseOrReqError> {
     let y = year_id;
     let c = class_id;
@@ -29,7 +24,7 @@ pub async fn request_lessons_table(
 
     let url = format!("https://dnevnik.egov66.ru/api/estimate?schoolYear={y}&classId={c}&periodId={p}&subjectId=00000000-0000-0000-0000-000000000000&studentId={s}");
 
-    let resp = match req(&url, credentials::COOKIE).await {
+    let resp = match bear_req(&url, token).await {
         Ok(response) => response,
         Err(err) => return Err(ParseOrReqError::ReqError(err.without_url())),
     };
@@ -42,12 +37,15 @@ pub async fn request_lessons_table(
     Ok(api_json_to_ebis_structs(parsed))
 }
 
-pub async fn request_current_year_id(student_id: &str) -> Result<String, ParseOrReqError> {
+pub async fn request_current_year_id(
+    student_id: &str,
+    token: &str,
+) -> Result<String, ParseOrReqError> {
     let s = student_id;
 
     let url = format!("https://dnevnik.egov66.ru/api/estimate/years?studentId={s}");
 
-    let resp = match req(&url, credentials::COOKIE).await {
+    let resp = match bear_req(&url, token).await {
         Ok(response) => response,
         Err(err) => return Err(ParseOrReqError::ReqError(err.without_url())),
     };
@@ -68,6 +66,7 @@ pub async fn request_period_ids(
     student_id: &str,
     year_id: &str,
     class_id: &str,
+    token: &str,
 ) -> Result<Vec<(String, String)>, ParseOrReqError> {
     let s = student_id;
     let y = year_id;
@@ -77,7 +76,7 @@ pub async fn request_period_ids(
         "https://dnevnik.egov66.ru/api/estimate/periods?schoolYear={y}&classId={c}&studentId={s}"
     );
 
-    let resp = match req(&url, credentials::COOKIE).await {
+    let resp = match bear_req(&url, token).await {
         Ok(response) => response,
         Err(err) => return Err(ParseOrReqError::ReqError(err.without_url())),
     };
@@ -101,13 +100,14 @@ pub async fn request_period_ids(
 pub async fn request_current_calss_id(
     student_id: &str,
     year_id: &str,
+    token: &str,
 ) -> Result<String, ParseOrReqError> {
     let s = student_id;
     let y = year_id;
 
     let url = format!("https://dnevnik.egov66.ru/api/classes?studentId={s}&schoolYear={y}");
 
-    let resp = match req(&url, credentials::COOKIE).await {
+    let resp = match bear_req(&url, token).await {
         Ok(response) => response,
         Err(err) => return Err(ParseOrReqError::ReqError(err.without_url())),
     };

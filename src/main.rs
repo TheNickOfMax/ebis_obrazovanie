@@ -2,6 +2,7 @@ use ebis_api::{
     credentials,
     requests::{request_current_calss_id, request_lessons_table, request_period_ids},
 };
+use ebis_lib::errors::ParseOrReqError;
 
 use crate::ebis_lib::diary::{Discipline, Lesson, Periods};
 
@@ -10,14 +11,17 @@ mod ebis_lib;
 mod json_utils;
 
 #[tokio::main]
-async fn main() -> Result<(), ebis_lib::diary::Error> {
-    let year = ebis_api::requests::request_current_year_id(credentials::STUDENT_ID).await?;
+async fn main() -> Result<(), ParseOrReqError> {
+    let bearer = ebis_api::auth::gos_login("", "").await?;
+
+    let year =
+        ebis_api::requests::request_current_year_id(credentials::STUDENT_ID, &bearer).await?;
     println!("{}", year);
 
-    let class = request_current_calss_id(credentials::STUDENT_ID, &year).await?;
+    let class = request_current_calss_id(credentials::STUDENT_ID, &year, &bearer).await?;
     println!("{}", class);
 
-    let periods = request_period_ids(credentials::STUDENT_ID, &year, &class).await?;
+    let periods = request_period_ids(credentials::STUDENT_ID, &year, &class, &bearer).await?;
     println!("{:#?}", periods);
 
     let period = periods
@@ -27,7 +31,22 @@ async fn main() -> Result<(), ebis_lib::diary::Error> {
         .1
         .clone();
 
-    let table = request_lessons_table(&year, &class, &period, credentials::STUDENT_ID).await?;
-    println!("{:#?}", table);
+    let table =
+        request_lessons_table(&year, &class, &period, credentials::STUDENT_ID, &bearer).await?;
+
+    let pretty: Vec<(String, Vec<i8>, f32, String)> = table
+        .iter()
+        .map(|d| {
+            (
+                d.name.clone(),
+                d.to_grades::<i8>(),
+                d.estimate_grade(),
+                d.total_grade.clone(),
+            )
+        })
+        .collect();
+
+    println!("{:#?}", pretty);
+
     Ok(())
 }
