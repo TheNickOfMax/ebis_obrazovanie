@@ -9,6 +9,20 @@ pub enum Periods {
     Term4,
 }
 
+impl From<i32> for Periods {
+    fn from(value: i32) -> Self {
+        match value {
+            0 => Periods::Week,
+            1 => Periods::Finals,
+            2 => Periods::Term1,
+            3 => Periods::Term2,
+            4 => Periods::Term3,
+            5 => Periods::Term4,
+            _ => Periods::Week,
+        }
+    }
+}
+
 impl Periods {
     pub fn as_str(&self) -> &str {
         match self {

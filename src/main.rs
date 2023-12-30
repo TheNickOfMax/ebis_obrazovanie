@@ -26,8 +26,9 @@ async fn main() -> Result<(), ParseOrReqError> {
     login = login.trim().to_string();
     password = password.trim().to_string();
 
-    println!("\n> Logging in {login} {password}\n");
+    // Login with logging
 
+    println!("\n> Logging in {login} {password}\n");
     let bearer = ebis_api::auth::gos_login(&login, &password).await?;
     println!("\n----< Logged in >----\n");
 
@@ -43,14 +44,33 @@ async fn main() -> Result<(), ParseOrReqError> {
     println!("> Getting period ids\n");
     let periods = period_ids(&id, &year, &class, &bearer).await?;
 
+    // Print out all possible periods and ask what to show
+
+    println!("What period would you like to get grades for?\n");
+    for i in 0..5 {
+        println!("{}. {}", i, ebis_lib::diary::Periods::from(i).as_str());
+    }
+
+    let mut choice_str = String::new();
+
+    _ = stdin.read_line(&mut choice_str);
+    choice_str = choice_str.trim().to_string();
+
+    let choice: i32 = choice_str.parse().expect("Fuck you");
+
     let period = periods
         .iter()
-        .find(|p| p.0 == Periods::Term2.as_str())
-        .unwrap()
+        .find(|p| p.0 == Periods::from(choice).as_str())
+        .expect("Something fucked up")
         .1
         .clone();
 
+    // Request the grades
+
+    println!("> Getting grades for that period");
     let disciplines = lessons_table(&year, &class, &period, &id, &bearer).await?;
+
+    // Covert and pretty print the table
 
     let table: Vec<(String, Vec<i8>, f32, String)> = disciplines
         .iter()
@@ -75,5 +95,9 @@ async fn main() -> Result<(), ParseOrReqError> {
 
     println!("{}", pretty.to_string());
 
+    // Wait for input to stop
+
+    println!("\nPress enter to exit");
+    _ = stdin.read_line(&mut String::new());
     Ok(())
 }
