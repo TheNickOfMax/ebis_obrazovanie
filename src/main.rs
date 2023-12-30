@@ -1,9 +1,9 @@
-use ebis_api::requests::{
-    current_calss_id, current_year_id, lessons_table, period_ids, student_id,
+use crate::{
+    ebis_api::requests::{
+        current_calss_id, current_year_id, lessons_table, period_ids, student_id,
+    },
+    ebis_lib::{diary::Periods, errors::ParseOrReqError},
 };
-use ebis_lib::errors::ParseOrReqError;
-
-use crate::ebis_lib::diary::Periods;
 
 mod ebis_api;
 mod ebis_lib;
