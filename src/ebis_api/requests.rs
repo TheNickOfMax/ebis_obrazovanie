@@ -1,6 +1,6 @@
 use crate::{
     ebis_lib::{diary::Discipline, errors::ParseOrReqError},
-    json_utils::{conversions::api_json_to_ebis_structs, from_json_trait::FromJson},
+    json_utils::conversions::api_json_to_ebis_structs,
 };
 
 use json::JsonValue;
@@ -103,10 +103,12 @@ pub async fn student_id(token: &str) -> Result<String, ParseOrReqError> {
     let url = "https://dnevnik.egov66.ru/api/students";
 
     let resp = bear_req(url, token).await?;
-
     let parsed = json::parse(&resp)?;
 
-    let student = &Vec::<JsonValue>::from_json_array(parsed["students"].clone())[0];
+    let json_students = &parsed["students"].clone();
+    let students: Vec<&JsonValue> = json_students.members().collect();
+
+    let student = students[0];
 
     let id =
         student["id"]

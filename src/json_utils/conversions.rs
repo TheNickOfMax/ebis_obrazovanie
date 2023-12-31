@@ -1,14 +1,12 @@
-use crate::{
-    ebis_lib::diary::{Discipline, Lesson},
-    json_utils::from_json_trait::FromJson,
-};
+use crate::ebis_lib::diary::{Discipline, Lesson};
 
 use json::JsonValue;
 
 pub fn api_json_to_ebis_structs(api_json: JsonValue) -> Vec<Discipline> {
     // leave only the disciplines
-    let json_disciplines: Vec<JsonValue> =
-        Vec::from_json_array(api_json["periodGradesTable"]["disciplines"].clone());
+    let json_disciplines: Vec<&JsonValue> = api_json["periodGradesTable"]["disciplines"]
+        .members()
+        .collect();
 
     let disciplines: Vec<Discipline> = json_disciplines
         .iter()
@@ -29,8 +27,9 @@ pub fn api_json_to_ebis_structs(api_json: JsonValue) -> Vec<Discipline> {
 }
 
 pub fn json_array_to_lesson_vec(json_array: &JsonValue) -> Vec<Lesson> {
-    Vec::<JsonValue>::from_json_array(json_array.clone())
-        .iter()
+    json_array
+        .clone()
+        .members()
         .map(|lesson| json_value_to_lesson(lesson))
         .collect()
 }
@@ -47,15 +46,17 @@ pub fn json_value_to_lesson(lesson: &JsonValue) -> Lesson {
 }
 
 pub fn json_array_to_grade_vec(json_array: &JsonValue) -> Vec<Vec<String>> {
-    Vec::<JsonValue>::from_json_array(json_array.clone())
-        .iter()
+    json_array
+        .clone()
+        .members()
         .map(|grade| json_value_to_grade(grade))
         .collect()
 }
 
 pub fn json_value_to_grade(grade: &JsonValue) -> Vec<String> {
-    Vec::<JsonValue>::from_json_array(grade.clone())
-        .iter()
+    grade
+        .clone()
+        .members()
         .map(|g| g.as_str().unwrap_or_default().to_string())
         .collect()
 }
