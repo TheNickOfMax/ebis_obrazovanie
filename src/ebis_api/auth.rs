@@ -65,16 +65,13 @@ pub async fn bearer_from_code(cli: Client, auth_code: &str) -> Result<String, Pa
 
     let resp_json = json::parse(&resp_text)?;
 
-    let token = match resp_json["accessToken"].as_str() {
-        Some(t) => t.to_string(),
-        None => {
-            return Err(ParseOrReqError::ParsingError(json::Error::wrong_type(
-                "str",
-            )))
-        }
-    };
+    let token = resp_json["accessToken"]
+        .as_str()
+        .ok_or(ParseOrReqError::ParsingError(json::Error::wrong_type(
+            "str",
+        )))?;
 
-    Ok(token)
+    Ok(token.to_string())
 }
 
 pub async fn revoke_token(token: &str) -> Result<String, ParseOrReqError> {

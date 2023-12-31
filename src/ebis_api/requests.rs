@@ -90,14 +90,12 @@ pub async fn current_calss_id(
 
     let parsed = json::parse(&resp)?;
 
-    let json_value = match parsed["currentClass"]["value"].as_str() {
-        Some(parsed_value) => parsed_value,
-        None => {
-            return Err(ParseOrReqError::ParsingError(json::Error::WrongType(
+    let json_value =
+        parsed["currentClass"]["value"]
+            .as_str()
+            .ok_or(ParseOrReqError::ParsingError(json::Error::WrongType(
                 "None".to_string(),
-            )))
-        }
-    };
+            )))?;
     Ok(json_value.to_string())
 }
 
@@ -110,13 +108,11 @@ pub async fn student_id(token: &str) -> Result<String, ParseOrReqError> {
 
     let student = &Vec::<JsonValue>::from_json_array(parsed["students"].clone())[0];
 
-    let id = match student["id"].as_str() {
-        Some(parsed_value) => parsed_value,
-        None => {
-            return Err(ParseOrReqError::ParsingError(json::Error::WrongType(
+    let id =
+        student["id"]
+            .as_str()
+            .ok_or(ParseOrReqError::ParsingError(json::Error::WrongType(
                 "str".to_string(),
-            )))
-        }
-    };
+            )))?;
     Ok(id.to_string())
 }
