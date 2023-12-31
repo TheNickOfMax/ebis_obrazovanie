@@ -1,6 +1,6 @@
 use std::io::Write;
 
-use prettytable::{row, table, Table};
+use prettytable::{row, Table};
 
 use crate::{
     ebis_api::requests::{
