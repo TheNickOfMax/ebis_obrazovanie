@@ -90,6 +90,7 @@ fn get_input(prompt: &str) -> String {
     print!("{}", prompt);
     _ = std::io::stdout().flush();
     _ = std::io::stdin().read_line(&mut input);
+
     input = input.trim().to_string();
     input
 }

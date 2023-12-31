@@ -21,11 +21,9 @@ pub async fn lessons_table(
     let c = class_id;
     let p = period_id;
     let s = student_id;
-
     let url = format!("https://dnevnik.egov66.ru/api/estimate?schoolYear={y}&classId={c}&periodId={p}&subjectId=00000000-0000-0000-0000-000000000000&studentId={s}");
 
     let resp = bear_req(&url, token).await?;
-
     let parsed = json::parse(&resp)?;
 
     Ok(api_json_to_ebis_structs(parsed))
@@ -33,11 +31,9 @@ pub async fn lessons_table(
 
 pub async fn current_year_id(student_id: &str, token: &str) -> Result<String, ParseOrReqError> {
     let s = student_id;
-
     let url = format!("https://dnevnik.egov66.ru/api/estimate/years?studentId={s}");
 
     let resp = bear_req(&url, token).await?;
-
     let parsed = json::parse(&resp)?;
 
     Ok(parsed["currentYear"]["id"]
@@ -56,13 +52,11 @@ pub async fn period_ids(
     let s = student_id;
     let y = year_id;
     let c = class_id;
-
     let url = format!(
         "https://dnevnik.egov66.ru/api/estimate/periods?schoolYear={y}&classId={c}&studentId={s}"
     );
 
     let resp = bear_req(&url, token).await?;
-
     let parsed = json::parse(&resp)?;
 
     Ok(parsed["periods"]
@@ -83,11 +77,9 @@ pub async fn current_calss_id(
 ) -> Result<String, ParseOrReqError> {
     let s = student_id;
     let y = year_id;
-
     let url = format!("https://dnevnik.egov66.ru/api/classes?studentId={s}&schoolYear={y}");
 
     let resp = bear_req(&url, token).await?;
-
     let parsed = json::parse(&resp)?;
 
     let json_value = parsed["currentClass"]["value"]
@@ -108,7 +100,6 @@ pub async fn student_id(token: &str) -> Result<String, ParseOrReqError> {
     let students: Vec<&JsonValue> = json_students.members().collect();
 
     let student = students[0];
-
     let id = student["id"]
         .as_str()
         .ok_or(ParseOrReqError::from(json::Error::WrongType(

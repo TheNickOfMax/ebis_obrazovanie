@@ -55,12 +55,11 @@ impl Discipline {
 
     /// Returns the estimate grade of this [`Discipline`].
     pub fn estimate_grade(&self) -> f32 {
-        let f_grades: Vec<f32> = self.to_grades();
+        let grades: Vec<f32> = self.to_grades();
 
-        let sum: f32 = f_grades.iter().sum();
-
+        let sum: f32 = grades.iter().sum();
         if sum > 0.0 {
-            return sum / f_grades.len() as f32;
+            return sum / grades.len() as f32;
         }
         return 0.0;
     }

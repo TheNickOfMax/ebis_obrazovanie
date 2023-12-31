@@ -57,10 +57,9 @@ pub async fn bearer_from_code(cli: Client, auth_code: &str) -> Result<String, Pa
         .body(req_body.clone())
         .header("Content-Type", "application/json")
         .send();
+
     let resp = req.await?;
-
     let resp_text = resp.text().await?;
-
     let resp_json = json::parse(&resp_text)?;
 
     let token = resp_json["accessToken"]
