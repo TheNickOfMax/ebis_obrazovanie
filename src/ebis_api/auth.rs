@@ -2,20 +2,20 @@ use crate::ebis_lib::errors::ParseOrReqError;
 
 use reqwest::Client;
 
+use super::requests::bear_req;
+
 /// Logs into the provided gosuslugi acount and gets a user's bearer roken for dnevnik
 pub async fn gos_login(login: &str, password: &str) -> Result<String, ParseOrReqError> {
     let login_body = format!("{{\"login\":\"{login}\",\"password\":\"{password}\"}}");
 
     let cli: reqwest::Client = reqwest::Client::builder().cookie_store(true).build()?;
 
-    println!(">> Initial request to dnevnik's login, which redirects to gosuslugi");
     // Initial request to dnevnik's login, which redirects to gosuslugi
     let req_dnev = cli
         .get("https://dnevnik.egov66.ru/api/auth/broker/esia/login?client_id=aiss2-diary")
         .send();
     let _resp_dnev = req_dnev.await?;
 
-    println!(">> Request to the gosuslugi's login, which gives a redirect link back to dnevnik");
     // Request to the gosuslugi's login, which gives a redirect link back to dnevnik
     let req_gos = cli
         .post("https://esia.gosuslugi.ru/aas/oauth2/api/login")
@@ -29,7 +29,6 @@ pub async fn gos_login(login: &str, password: &str) -> Result<String, ParseOrReq
         .as_str()
         .ok_or(json::Error::wrong_type("not found"))?;
 
-    println!(">> Getting code from dnevnik");
     // Auth finishing request to the dnevnik
     let last = cli.get(redir).send();
     let last_resp = last.await?;
@@ -43,7 +42,6 @@ pub async fn gos_login(login: &str, password: &str) -> Result<String, ParseOrReq
         .to_string()
         .replace("%3d", "=");
 
-    println!(">> Finish login process");
     // Finish login process
     let _fin = cli.get(code_url).send().await?;
 
@@ -56,7 +54,6 @@ pub async fn bearer_from_code(cli: Client, auth_code: &str) -> Result<String, Pa
         "{{\"authorizationCode\":\"{auth_code}\",\"redirectUrl\":\"https://dnevnik.egov66.ru/\"}}"
     );
 
-    println!(">> Geting token");
     let req = cli
         .post("https://dnevnik.egov66.ru/api/auth/Token")
         .body(req_body.clone())
@@ -69,7 +66,7 @@ pub async fn bearer_from_code(cli: Client, auth_code: &str) -> Result<String, Pa
     let resp_json = match json::parse(&resp_text) {
         Ok(jsn) => jsn,
         Err(err) => {
-            println!("{resp_text}");
+            println!("Error while getting ebis token");
             return Err(err.into());
         }
     };
@@ -84,4 +81,10 @@ pub async fn bearer_from_code(cli: Client, auth_code: &str) -> Result<String, Pa
     };
 
     Ok(token)
+}
+
+pub async fn revoke_token(token: &str) -> Result<String, ParseOrReqError> {
+    let url = "https://dnevnik.egov66.ru/api/auth/Token/Revoke";
+
+    Ok(bear_req(url, token).await?)
 }

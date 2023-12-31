@@ -15,27 +15,10 @@ mod json_utils;
 
 #[tokio::main]
 async fn main() -> Result<(), ParseOrReqError> {
-    println!("Input your gosuslugi login and password:");
-
-    let stdin = std::io::stdin();
-
-    let mut login = String::new();
-    let mut password = String::new();
-    print!("login -> ");
-    _ = std::io::stdout().flush();
-
-    _ = stdin.read_line(&mut login);
-
-    print!("password -> ");
-    _ = std::io::stdout().flush();
-
-    _ = stdin.read_line(&mut password);
-
-    login = login.trim().to_string();
-    password = password.trim().to_string();
+    let login = get_input("Login ->\t");
+    let password = get_input("Password ->\t");
 
     // Login with logging
-
     println!("\n> Logging in {login} {password}\n");
     let bearer = ebis_api::auth::gos_login(&login, &password).await?;
     println!("\n----< Logged in >----\n");
@@ -53,19 +36,14 @@ async fn main() -> Result<(), ParseOrReqError> {
     let periods = period_ids(&id, &year, &class, &bearer).await?;
 
     // Print out all possible periods and ask what to show
-
     println!("What period would you like to get grades for?\n");
     for i in 0..5 {
         println!("{}. {}", i, ebis_lib::diary::Periods::from(i).as_str());
     }
-
-    let mut choice_str = String::new();
-
-    _ = stdin.read_line(&mut choice_str);
-    choice_str = choice_str.trim().to_string();
-
+    let choice_str = get_input("\n->\t");
     let choice: i32 = choice_str.parse().expect("Choose like a normal person");
 
+    //This is stupid, i'll probably find a better solution later
     let period = periods
         .iter()
         .find(|p: &&(String, String)| p.0 == Periods::from(choice).as_str())
@@ -74,12 +52,10 @@ async fn main() -> Result<(), ParseOrReqError> {
         .clone();
 
     // Request the grades
-
-    println!("> Getting grades for that period");
+    println!("\n> Getting grades for that period\n");
     let disciplines = lessons_table(&year, &class, &period, &id, &bearer).await?;
 
-    // Covert and pretty print the table
-
+    // Leave only valid grades
     let table: Vec<(String, Vec<i8>, f32, String)> = disciplines
         .iter()
         .map(|d| {
@@ -92,6 +68,7 @@ async fn main() -> Result<(), ParseOrReqError> {
         })
         .collect();
 
+    // Convert to pretty table and print
     let mut pretty = Table::new();
     for p in table {
         let grd =
@@ -100,12 +77,24 @@ async fn main() -> Result<(), ParseOrReqError> {
                 .collect::<String>();
         pretty.add_row(row![p.0, grd, p.2, p.3]);
     }
-
     println!("{}", pretty.to_string());
 
-    // Wait for input to stop
+    // Revoke the token
+    println!("> Revoking token");
+    _ = ebis_api::auth::revoke_token(&bearer);
 
-    println!("\nPress enter to exit");
-    _ = stdin.read_line(&mut String::new());
+    // Wait for input to exit
+    _ = get_input("\nPress enter to exit");
+
     Ok(())
+}
+
+fn get_input(prompt: &str) -> String {
+    let mut input = String::new();
+
+    print!("{}", prompt);
+    _ = std::io::stdout().flush();
+    _ = std::io::stdin().read_line(&mut input);
+    input = input.trim().to_string();
+    input
 }
