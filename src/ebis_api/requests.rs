@@ -24,15 +24,9 @@ pub async fn lessons_table(
 
     let url = format!("https://dnevnik.egov66.ru/api/estimate?schoolYear={y}&classId={c}&periodId={p}&subjectId=00000000-0000-0000-0000-000000000000&studentId={s}");
 
-    let resp = match bear_req(&url, token).await {
-        Ok(response) => response,
-        Err(err) => return Err(ParseOrReqError::ReqError(err.without_url())),
-    };
+    let resp = bear_req(&url, token).await?;
 
-    let parsed = match json::parse(&resp) {
-        Ok(parsed_json) => parsed_json,
-        Err(err) => return Err(ParseOrReqError::ParsingError(err)),
-    };
+    let parsed = json::parse(&resp)?;
 
     Ok(api_json_to_ebis_structs(parsed))
 }
@@ -42,15 +36,9 @@ pub async fn current_year_id(student_id: &str, token: &str) -> Result<String, Pa
 
     let url = format!("https://dnevnik.egov66.ru/api/estimate/years?studentId={s}");
 
-    let resp = match bear_req(&url, token).await {
-        Ok(response) => response,
-        Err(err) => return Err(ParseOrReqError::ReqError(err.without_url())),
-    };
+    let resp = bear_req(&url, token).await?;
 
-    let parsed = match json::parse(&resp) {
-        Ok(parsed_json) => parsed_json,
-        Err(err) => return Err(ParseOrReqError::ParsingError(err)),
-    };
+    let parsed = json::parse(&resp)?;
 
     Ok(parsed["currentYear"]["id"]
         .as_str()
@@ -73,15 +61,9 @@ pub async fn period_ids(
         "https://dnevnik.egov66.ru/api/estimate/periods?schoolYear={y}&classId={c}&studentId={s}"
     );
 
-    let resp = match bear_req(&url, token).await {
-        Ok(response) => response,
-        Err(err) => return Err(ParseOrReqError::ReqError(err.without_url())),
-    };
+    let resp = bear_req(&url, token).await?;
 
-    let parsed = match json::parse(&resp) {
-        Ok(parsed_json) => parsed_json,
-        Err(err) => return Err(ParseOrReqError::ParsingError(err)),
-    };
+    let parsed = json::parse(&resp)?;
 
     Ok(parsed["periods"]
         .members()
@@ -104,15 +86,9 @@ pub async fn current_calss_id(
 
     let url = format!("https://dnevnik.egov66.ru/api/classes?studentId={s}&schoolYear={y}");
 
-    let resp = match bear_req(&url, token).await {
-        Ok(response) => response,
-        Err(err) => return Err(ParseOrReqError::ReqError(err.without_url())),
-    };
+    let resp = bear_req(&url, token).await?;
 
-    let parsed = match json::parse(&resp) {
-        Ok(parsed_json) => parsed_json,
-        Err(err) => return Err(ParseOrReqError::ParsingError(err)),
-    };
+    let parsed = json::parse(&resp)?;
 
     let json_value = match parsed["currentClass"]["value"].as_str() {
         Some(parsed_value) => parsed_value,
@@ -128,17 +104,12 @@ pub async fn current_calss_id(
 pub async fn student_id(token: &str) -> Result<String, ParseOrReqError> {
     let url = "https://dnevnik.egov66.ru/api/students";
 
-    let resp = match bear_req(url, token).await {
-        Ok(response) => response,
-        Err(err) => return Err(ParseOrReqError::ReqError(err)),
-    };
+    let resp = bear_req(url, token).await?;
 
-    let parsed = match json::parse(&resp) {
-        Ok(parsed_json) => parsed_json,
-        Err(err) => return Err(ParseOrReqError::ParsingError(err)),
-    };
+    let parsed = json::parse(&resp)?;
 
     let student = &Vec::<JsonValue>::from_json_array(parsed["students"].clone())[0];
+
     let id = match student["id"].as_str() {
         Some(parsed_value) => parsed_value,
         None => {

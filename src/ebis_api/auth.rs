@@ -63,13 +63,7 @@ pub async fn bearer_from_code(cli: Client, auth_code: &str) -> Result<String, Pa
 
     let resp_text = resp.text().await?;
 
-    let resp_json = match json::parse(&resp_text) {
-        Ok(jsn) => jsn,
-        Err(err) => {
-            println!("Error while getting ebis token");
-            return Err(err.into());
-        }
-    };
+    let resp_json = json::parse(&resp_text)?;
 
     let token = match resp_json["accessToken"].as_str() {
         Some(t) => t.to_string(),
