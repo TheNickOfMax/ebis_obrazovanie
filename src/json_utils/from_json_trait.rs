@@ -1,5 +1,5 @@
 use json::JsonValue;
-
+// I should get rid of this
 pub trait FromJson<T> {
     fn from_json_array(value: JsonValue) -> Vec<T>;
 }

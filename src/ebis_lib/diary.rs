@@ -80,6 +80,12 @@ impl Lesson {
         T: FromStr,
         T::Err: Debug,
     {
-        self.grades.iter().map(|g| g.parse().unwrap()).collect()
+        self.grades
+            .iter()
+            .map(|g| {
+                g.parse()
+                    .expect("This err is impossible to get because of the trait bounds")
+            })
+            .collect()
     }
 }
