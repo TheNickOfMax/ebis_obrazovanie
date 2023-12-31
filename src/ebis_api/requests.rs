@@ -90,12 +90,11 @@ pub async fn current_calss_id(
 
     let parsed = json::parse(&resp)?;
 
-    let json_value =
-        parsed["currentClass"]["value"]
-            .as_str()
-            .ok_or(ParseOrReqError::ParsingError(json::Error::WrongType(
-                "None".to_string(),
-            )))?;
+    let json_value = parsed["currentClass"]["value"]
+        .as_str()
+        .ok_or(ParseOrReqError::from(json::Error::WrongType(
+            "None".to_string(),
+        )))?;
     Ok(json_value.to_string())
 }
 
@@ -110,11 +109,10 @@ pub async fn student_id(token: &str) -> Result<String, ParseOrReqError> {
 
     let student = students[0];
 
-    let id =
-        student["id"]
-            .as_str()
-            .ok_or(ParseOrReqError::ParsingError(json::Error::WrongType(
-                "str".to_string(),
-            )))?;
+    let id = student["id"]
+        .as_str()
+        .ok_or(ParseOrReqError::from(json::Error::WrongType(
+            "str".to_string(),
+        )))?;
     Ok(id.to_string())
 }
