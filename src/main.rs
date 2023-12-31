@@ -1,3 +1,5 @@
+use std::io::Write;
+
 use prettytable::{row, table, Table};
 
 use crate::{
@@ -19,8 +21,14 @@ async fn main() -> Result<(), ParseOrReqError> {
 
     let mut login = String::new();
     let mut password = String::new();
+    print!("login -> ");
+    _ = std::io::stdout().flush();
 
     _ = stdin.read_line(&mut login);
+
+    print!("password -> ");
+    _ = std::io::stdout().flush();
+
     _ = stdin.read_line(&mut password);
 
     login = login.trim().to_string();
@@ -56,12 +64,12 @@ async fn main() -> Result<(), ParseOrReqError> {
     _ = stdin.read_line(&mut choice_str);
     choice_str = choice_str.trim().to_string();
 
-    let choice: i32 = choice_str.parse().expect("Fuck you");
+    let choice: i32 = choice_str.parse().expect("Choose like a normal person");
 
     let period = periods
         .iter()
-        .find(|p| p.0 == Periods::from(choice).as_str())
-        .expect("Something fucked up")
+        .find(|p: &&(String, String)| p.0 == Periods::from(choice).as_str())
+        .expect("Something deeply fucked up happened")
         .1
         .clone();
 
