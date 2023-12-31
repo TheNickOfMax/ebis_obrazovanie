@@ -26,7 +26,7 @@ pub fn api_json_to_ebis_structs(api_json: JsonValue) -> Vec<Discipline> {
     disciplines
 }
 
-pub fn json_array_to_lesson_vec(json_array: &JsonValue) -> Vec<Lesson> {
+fn json_array_to_lesson_vec(json_array: &JsonValue) -> Vec<Lesson> {
     json_array
         .clone()
         .members()
@@ -34,7 +34,7 @@ pub fn json_array_to_lesson_vec(json_array: &JsonValue) -> Vec<Lesson> {
         .collect()
 }
 
-pub fn json_value_to_lesson(lesson: &JsonValue) -> Lesson {
+fn json_value_to_lesson(lesson: &JsonValue) -> Lesson {
     Lesson {
         lesson_id: lesson["lessonId"].as_str().unwrap_or_default().to_string(),
         date: lesson["date"].as_str().unwrap_or_default().to_string(),
@@ -45,7 +45,7 @@ pub fn json_value_to_lesson(lesson: &JsonValue) -> Lesson {
     }
 }
 
-pub fn json_array_to_grade_vec(json_array: &JsonValue) -> Vec<Vec<String>> {
+fn json_array_to_grade_vec(json_array: &JsonValue) -> Vec<Vec<String>> {
     json_array
         .clone()
         .members()
@@ -53,7 +53,7 @@ pub fn json_array_to_grade_vec(json_array: &JsonValue) -> Vec<Vec<String>> {
         .collect()
 }
 
-pub fn json_value_to_grade(grade: &JsonValue) -> Vec<String> {
+fn json_value_to_grade(grade: &JsonValue) -> Vec<String> {
     grade
         .clone()
         .members()

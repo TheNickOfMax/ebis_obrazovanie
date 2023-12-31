@@ -11,7 +11,6 @@ use crate::{
 
 mod ebis_api;
 mod ebis_lib;
-mod json_utils;
 
 #[tokio::main]
 async fn main() -> Result<(), ParseOrReqError> {

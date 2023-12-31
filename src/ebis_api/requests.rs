@@ -1,6 +1,6 @@
 use crate::{
+    ebis_lib::conversions::api_json_to_ebis_structs,
     ebis_lib::{diary::Discipline, errors::ParseOrReqError},
-    json_utils::conversions::api_json_to_ebis_structs,
 };
 
 use json::JsonValue;
