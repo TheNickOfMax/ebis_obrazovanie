@@ -50,10 +50,7 @@ impl Discipline {
         T: FromStr,
         T::Err: Debug,
     {
-        self.lessons
-            .iter()
-            .flat_map(|l| l.to_grades::<T>())
-            .collect()
+        self.lessons.iter().flat_map(|l| l.to_grades()).collect()
     }
 
     /// Returns the estimate grade of this [`Discipline`].
@@ -83,9 +80,6 @@ impl Lesson {
         T: FromStr,
         T::Err: Debug,
     {
-        self.grades
-            .iter()
-            .map(|g| g.parse::<T>().unwrap())
-            .collect()
+        self.grades.iter().map(|g| g.parse().unwrap()).collect()
     }
 }

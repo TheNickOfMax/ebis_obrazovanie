@@ -61,7 +61,7 @@ async fn main() -> Result<(), ParseOrReqError> {
         .map(|d| {
             (
                 d.name.clone(),
-                d.to_grades::<i8>(),
+                d.to_grades(),
                 d.estimate_grade(),
                 d.total_grade.clone(),
             )
@@ -71,10 +71,7 @@ async fn main() -> Result<(), ParseOrReqError> {
     // Convert to pretty table and print
     let mut pretty = Table::new();
     for p in table {
-        let grd =
-            p.1.into_iter()
-                .map(|g| g.to_string() + " ")
-                .collect::<String>();
+        let grd: String = p.1.into_iter().map(|g| g.to_string() + " ").collect();
         pretty.add_row(row![p.0, grd, p.2, p.3]);
     }
     println!("{}", pretty.to_string());
