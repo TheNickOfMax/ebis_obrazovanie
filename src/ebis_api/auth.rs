@@ -24,8 +24,10 @@ pub async fn gos_login(login: &str, password: &str) -> Result<String, ParseOrReq
     let resp_gos = req_gos.await?;
 
     // Parse the auth finishing redirect url
-    let gos_json = json::parse(&resp_gos.text().await?).unwrap();
-    let redir = gos_json["redirect_url"].as_str().unwrap();
+    let gos_json = json::parse(&resp_gos.text().await?)?;
+    let redir = gos_json["redirect_url"]
+        .as_str()
+        .ok_or(json::Error::wrong_type("not found"))?;
 
     println!(">> Getting code from dnevnik");
     // Auth finishing request to the dnevnik
@@ -34,7 +36,10 @@ pub async fn gos_login(login: &str, password: &str) -> Result<String, ParseOrReq
 
     // Code to get dnvnik's bearer token is inside the last url
     let code_url = last_resp.url().as_str().to_string();
-    let code = &code_url[code_url.rfind("code=").unwrap() + 5..]
+    let code = &code_url[code_url
+        .rfind("code=")
+        .ok_or(json::Error::wrong_type("not found"))?
+        + 5..]
         .to_string()
         .replace("%3d", "=");
 

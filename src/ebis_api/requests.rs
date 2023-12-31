@@ -54,7 +54,7 @@ pub async fn current_year_id(student_id: &str, token: &str) -> Result<String, Pa
 
     Ok(parsed["currentYear"]["id"]
         .as_str()
-        .unwrap_or_default()
+        .ok_or(json::Error::WrongType("not found".to_string()))?
         .to_string())
 }
 
