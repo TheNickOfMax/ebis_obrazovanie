@@ -29,17 +29,24 @@ pub async fn lessons_table(
     Ok(api_json_to_ebis_structs(parsed))
 }
 
-pub async fn current_year_id(student_id: &str, token: &str) -> Result<String, ParseOrReqError> {
+pub async fn year_ids(student_id: &str, token: &str) -> Result<Vec<String>, ParseOrReqError> {
     let s = student_id;
     let url = format!("https://dnevnik.egov66.ru/api/estimate/years?studentId={s}");
 
     let resp = bear_req(&url, token).await?;
     let parsed = json::parse(&resp)?;
 
-    Ok(parsed["currentYear"]["id"]
-        .as_str()
-        .ok_or(json::Error::WrongType("not found".to_string()))?
-        .to_string())
+    let years: Vec<String> = parsed["schoolYears"]
+        .members()
+        .map(|j| {
+            j["id"]
+                .as_str()
+                .expect("couldn't get school years")
+                .to_string()
+        })
+        .collect();
+
+    Ok(years)
 }
 
 //returns in format Vec<(name, id)>
@@ -70,7 +77,7 @@ pub async fn period_ids(
         .collect())
 }
 
-pub async fn current_calss_id(
+pub async fn calss_id(
     student_id: &str,
     year_id: &str,
     token: &str,

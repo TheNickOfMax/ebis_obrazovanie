@@ -1,7 +1,5 @@
 use crate::{
-    ebis_api::requests::{
-        current_calss_id, current_year_id, lessons_table, period_ids, student_id,
-    },
+    ebis_api::requests::{calss_id, lessons_table, period_ids, student_id, year_ids},
     ebis_lib::{diary::Periods, errors::ParseOrReqError},
 };
 
@@ -17,18 +15,29 @@ async fn main() -> Result<(), ParseOrReqError> {
     let password = get_input("Password ->\t");
 
     // Login with logging
-    println!("\n> Logging in {login} {password}\n");
+    println!("\n> Logging in {login} {password}");
     let bearer = ebis_api::auth::gos_login(&login, &password).await?;
     println!("\n----< Logged in >----\n");
 
     println!("> Getting student id");
     let id = student_id(&bearer).await?;
 
-    println!("> Getting year id");
-    let year = current_year_id(&id, &bearer).await?;
+    println!("> Getting years\n");
+    let years = year_ids(&id, &bearer).await?;
+
+    println!("Which year to get info for?");
+    for (i, y) in years.iter().enumerate() {
+        println!("{}. {}", i, y);
+    }
+
+    let year_choice: usize = get_input("\n->\t")
+        .parse()
+        .expect("Choose like a normal person");
+
+    let year = years.get(year_choice).expect("Choose like a normal person");
 
     println!("> Getting class id");
-    let class = current_calss_id(&id, &year, &bearer).await?;
+    let class = calss_id(&id, &year, &bearer).await?;
 
     println!("> Getting period ids\n");
     let periods = period_ids(&id, &year, &class, &bearer).await?;
@@ -38,13 +47,15 @@ async fn main() -> Result<(), ParseOrReqError> {
     for i in 0..5 {
         println!("{}. {}", i, ebis_lib::diary::Periods::from(i).as_str());
     }
-    let choice_str = get_input("\n->\t");
-    let choice: i32 = choice_str.parse().expect("Choose like a normal person");
+
+    let period_choice: i32 = get_input("\n->\t")
+        .parse()
+        .expect("Choose like a normal person");
 
     //This is stupid, i'll probably find a better solution later
     let period = periods
         .iter()
-        .find(|p: &&(String, String)| p.0 == Periods::from(choice).as_str())
+        .find(|p: &&(String, String)| p.0 == Periods::from(period_choice).as_str())
         .expect("Something deeply fucked up happened")
         .1
         .clone();
