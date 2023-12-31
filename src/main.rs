@@ -1,13 +1,12 @@
-use std::io::Write;
-
-use prettytable::{row, Table};
-
 use crate::{
     ebis_api::requests::{
         current_calss_id, current_year_id, lessons_table, period_ids, student_id,
     },
     ebis_lib::{diary::Periods, errors::ParseOrReqError},
 };
+
+use prettytable::{row, Table};
+use std::io::Write;
 
 mod ebis_api;
 mod ebis_lib;

@@ -1,8 +1,6 @@
-use crate::ebis_lib::errors::ParseOrReqError;
+use crate::{ebis_api::requests::bear_req, ebis_lib::errors::ParseOrReqError};
 
 use reqwest::Client;
-
-use super::requests::bear_req;
 
 /// Logs into the provided gosuslugi acount and gets a user's bearer roken for dnevnik
 pub async fn gos_login(login: &str, password: &str) -> Result<String, ParseOrReqError> {
