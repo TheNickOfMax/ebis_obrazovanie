@@ -1,18 +1,19 @@
 use crate::{
     ebis_api::requests::{calss_id, lessons_table, period_ids, student_id, year_ids},
     ebis_lib::{diary::Periods, errors::ParseOrReqError},
+    input::readln,
 };
 
 use prettytable::{row, Table};
-use std::io::Write;
 
 mod ebis_api;
 mod ebis_lib;
+mod input;
 
 #[tokio::main]
 async fn main() -> Result<(), ParseOrReqError> {
-    let login = get_input("Login ->\t");
-    let password = get_input("Password ->\t");
+    let login = readln("Login ->\t");
+    let password = readln("Password ->\t");
 
     // Login with logging
     println!("\n> Logging in {login} {password}");
@@ -30,7 +31,7 @@ async fn main() -> Result<(), ParseOrReqError> {
         println!("{}. {}", i, y);
     }
 
-    let year_choice: usize = get_input("\n->\t")
+    let year_choice: usize = readln("\n->\t")
         .parse()
         .expect("Choose like a normal person");
 
@@ -48,7 +49,7 @@ async fn main() -> Result<(), ParseOrReqError> {
         println!("{}. {}", i, ebis_lib::diary::Periods::from(i).as_str());
     }
 
-    let period_choice: i32 = get_input("\n->\t")
+    let period_choice: i32 = readln("\n->\t")
         .parse()
         .expect("Choose like a normal person");
 
@@ -90,18 +91,7 @@ async fn main() -> Result<(), ParseOrReqError> {
     _ = ebis_api::auth::revoke_token(&bearer);
 
     // Wait for input to exit
-    _ = get_input("\nPress enter to exit");
+    _ = readln("\nPress enter to exit");
 
     Ok(())
-}
-
-fn get_input(prompt: &str) -> String {
-    let mut input = String::new();
-
-    print!("{}", prompt);
-    _ = std::io::stdout().flush();
-    _ = std::io::stdin().read_line(&mut input);
-
-    input = input.trim().to_string();
-    input
 }
