@@ -1,4 +1,4 @@
-use std::{env::Args, io::Write};
+use std::{env::Args, fmt::Debug, io::Write};
 
 #[derive(Debug)]
 pub struct Config {
@@ -38,4 +38,32 @@ pub fn readln(prompt: &str) -> String {
 
     input = input.trim().to_string();
     input
+}
+
+pub fn choose<T>(prompt: &str, options: &Vec<T>) -> T
+where
+    T: Debug,
+    T: Clone,
+{
+    println!("\n{}", prompt);
+    for (i, option) in options.iter().enumerate() {
+        println!("{}. {:?}", i, option);
+    }
+
+    let choice: usize = readln("\n->\t")
+        .parse()
+        .expect("Choose like a normal person");
+
+    let chosen: T = options
+        .get(choice)
+        .cloned()
+        .expect("Choose like a normal person");
+
+    chosen
+}
+
+pub fn log_if(s: &str, b: bool) {
+    if b {
+        println!("{}", s)
+    }
 }

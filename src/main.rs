@@ -1,15 +1,15 @@
 use crate::{
     ebis_api::requests::{calss_id, lessons_table, period_ids, student_id, year_ids},
     ebis_lib::errors::ParseOrReqError,
-    input::{readln, Config},
+    utils::{choose, log_if, readln, Config},
 };
 
 use prettytable::{row, Table};
-use std::{env, fmt::Debug};
+use std::env;
 
 mod ebis_api;
 mod ebis_lib;
-mod input;
+mod utils;
 
 #[tokio::main]
 async fn main() -> Result<(), ParseOrReqError> {
@@ -58,7 +58,7 @@ async fn main() -> Result<(), ParseOrReqError> {
             }
         };
 
-        choose_from_list("Which year?", &years)
+        choose("Which year?", &years)
     };
 
     log_if("> Getting class id", conf.verbose.clone());
@@ -82,7 +82,7 @@ async fn main() -> Result<(), ParseOrReqError> {
     //-----------------------------------------------Main loop-------------------------------------------------------------
     loop {
         // Print out all possible periods and ask what to show
-        let period = choose_from_list("Which period?", &periods).1;
+        let period = choose("Which period?", &periods).1;
 
         // Request the grades
         log_if("> Getting grades", conf.verbose.clone());
@@ -130,32 +130,4 @@ async fn main() -> Result<(), ParseOrReqError> {
     }
 
     Ok(())
-}
-
-fn choose_from_list<T>(prompt: &str, options: &Vec<T>) -> T
-where
-    T: Debug,
-    T: Clone,
-{
-    println!("\n{}", prompt);
-    for (i, option) in options.iter().enumerate() {
-        println!("{}. {:?}", i, option);
-    }
-
-    let choice: usize = readln("\n->\t")
-        .parse()
-        .expect("Choose like a normal person");
-
-    let chosen: T = options
-        .get(choice)
-        .cloned()
-        .expect("Choose like a normal person");
-
-    chosen
-}
-
-fn log_if(s: &str, b: bool) {
-    if b {
-        println!("{}", s)
-    }
 }
