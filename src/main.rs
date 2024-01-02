@@ -5,11 +5,7 @@ use crate::{
 };
 
 use prettytable::{row, Table};
-use std::{
-    env,
-    fmt::{Debug, Display},
-    future::Future,
-};
+use std::{env, fmt::Debug};
 
 mod ebis_api;
 mod ebis_lib;
