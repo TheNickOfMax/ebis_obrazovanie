@@ -35,7 +35,7 @@ async fn main() -> Result<(), ParseOrReqError> {
         }
     };
 
-    log_if("\n-----<Logged in>-----\n", conf.verbose.clone());
+    println!("\n-----<Logged in>-----\n");
 
     log_if("> Getting student id", conf.verbose.clone());
     let id = match student_id(&bearer).await {
