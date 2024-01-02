@@ -62,54 +62,62 @@ async fn main() -> Result<(), ParseOrReqError> {
 
     log_if("> Getting period ids", conf.verbose.clone());
     let periods = period_ids(&id, &year, &class, &bearer).await?;
+    let mut exit: bool = true;
 
-    // Print out all possible periods and ask what to show
-    println!("What period would you like to get grades for?\n");
-    for (i, p) in periods.iter().enumerate() {
-        println!("{}. {}", i, p.0);
+    //-------------------------------------------------------------------------------------------------------------------------
+    while exit {
+        // Print out all possible periods and ask what to show
+        println!("What period would you like to get grades for?\n");
+        for (i, p) in periods.iter().enumerate() {
+            println!("{}. {}", i, p.0);
+        }
+
+        let period_choice: usize = readln("\n->\t")
+            .parse()
+            .expect("Choose like a normal person");
+
+        let period = periods
+            .get(period_choice)
+            .expect("Choose like a normal person")
+            .1
+            .clone();
+
+        // Request the grades
+        log_if("> Getting grades", conf.verbose.clone());
+        let disciplines = lessons_table(&year, &class, &period, &id, &bearer).await?;
+
+        // Leave only valid grades
+        let table: Vec<(String, Vec<i8>, f32, String)> = disciplines
+            .iter()
+            .map(|d| {
+                (
+                    d.name.clone(),
+                    d.to_grades(),
+                    d.estimate_grade(),
+                    d.total_grade.clone(),
+                )
+            })
+            .collect();
+
+        // Convert to pretty table and print
+        let mut pretty = Table::new();
+        for p in table {
+            let grd: String = p.1.into_iter().map(|g| g.to_string() + " ").collect();
+            pretty.add_row(row![p.0, grd, p.2, p.3]);
+        }
+        println!("{}", pretty.to_string());
+        let x: &str = &readln("exit? (y/n) ->\t");
+
+        match x {
+            "y" => exit = false,
+            "n" => exit = true,
+            _ => exit = true,
+        }
     }
-
-    let period_choice: usize = readln("\n->\t")
-        .parse()
-        .expect("Choose like a normal person");
-
-    let period = periods
-        .get(period_choice)
-        .expect("Choose like a normal person")
-        .1
-        .clone();
-
-    // Request the grades
-    log_if("> Getting grades", conf.verbose.clone());
-    let disciplines = lessons_table(&year, &class, &period, &id, &bearer).await?;
-
-    // Leave only valid grades
-    let table: Vec<(String, Vec<i8>, f32, String)> = disciplines
-        .iter()
-        .map(|d| {
-            (
-                d.name.clone(),
-                d.to_grades(),
-                d.estimate_grade(),
-                d.total_grade.clone(),
-            )
-        })
-        .collect();
-
-    // Convert to pretty table and print
-    let mut pretty = Table::new();
-    for p in table {
-        let grd: String = p.1.into_iter().map(|g| g.to_string() + " ").collect();
-        pretty.add_row(row![p.0, grd, p.2, p.3]);
-    }
-    println!("{}", pretty.to_string());
-
+    //-------------------------------------------------------------------------------------------------------------------------
     // Revoke the token
     log_if("> Revoking token", conf.verbose.clone());
     _ = ebis_api::auth::revoke_token(&bearer);
-
-    // Wait for input to exit
-    _ = readln("\nPress enter to exit");
 
     Ok(())
 }
