@@ -1,41 +1,5 @@
 use std::{fmt::Debug, str::FromStr};
 
-pub enum Periods {
-    Week,
-    Finals,
-    Term1,
-    Term2,
-    Term3,
-    Term4,
-}
-
-impl From<i32> for Periods {
-    fn from(value: i32) -> Self {
-        match value {
-            0 => Periods::Week,
-            1 => Periods::Finals,
-            2 => Periods::Term1,
-            3 => Periods::Term2,
-            4 => Periods::Term3,
-            5 => Periods::Term4,
-            _ => Periods::Week,
-        }
-    }
-}
-
-impl Periods {
-    pub fn as_str(&self) -> &str {
-        match self {
-            Periods::Week => "Текущая неделя",
-            Periods::Finals => "Итоговые оценки",
-            Periods::Term1 => "1 Четверть",
-            Periods::Term2 => "2 Четверть",
-            Periods::Term3 => "3 Четверть",
-            Periods::Term4 => "4 Четверть",
-        }
-    }
-}
-
 #[derive(Clone, Debug)]
 pub struct Discipline {
     pub name: String,
