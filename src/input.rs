@@ -1,31 +1,13 @@
 use std::{env::Args, io::Write};
 
+#[derive(Debug)]
 pub struct Config {
     pub verbose: bool,
     pub credentials_path: Option<String>,
     pub login: Option<String>,
     pub password: Option<String>,
     pub year: Option<String>,
-    pub class_id: Option<String>,
-    pub period_id: Option<String>,
-    pub student_id: Option<String>,
     pub bearer_token: Option<String>,
-}
-
-impl Config {
-    pub fn new() -> Self {
-        Config {
-            verbose: false,
-            credentials_path: None,
-            login: None,
-            password: None,
-            year: None,
-            class_id: None,
-            period_id: None,
-            student_id: None,
-            bearer_token: None,
-        }
-    }
 }
 
 impl From<Args> for Config {
@@ -44,9 +26,6 @@ impl From<Args> for Config {
             login: get_argument_value(&args, "-l"),
             password: get_argument_value(&args, "-p"),
             year: get_argument_value(&args, "-y"),
-            class_id: get_argument_value(&args, "-c"),
-            period_id: get_argument_value(&args, "-p"),
-            student_id: get_argument_value(&args, "-s"),
             bearer_token: get_argument_value(&args, "-t"),
         }
     }

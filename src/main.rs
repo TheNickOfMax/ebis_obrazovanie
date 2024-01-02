@@ -1,7 +1,9 @@
+use std::env;
+
 use crate::{
     ebis_api::requests::{calss_id, lessons_table, period_ids, student_id, year_ids},
-    ebis_lib::{diary::Periods, errors::ParseOrReqError},
-    input::readln,
+    ebis_lib::errors::ParseOrReqError,
+    input::{readln, Config},
 };
 
 use prettytable::{row, Table};
@@ -12,30 +14,48 @@ mod input;
 
 #[tokio::main]
 async fn main() -> Result<(), ParseOrReqError> {
-    let login = readln("Login ->\t");
-    let password = readln("Password ->\t");
+    let conf = Config::from(env::args());
 
-    // Login with logging
-    println!("\n> Logging in {login} {password}");
-    let bearer = ebis_api::auth::gos_login(&login, &password).await?;
+    println!("{:#?}", conf);
+
+    let bearer = if let Some(bearer_token) = conf.bearer_token {
+        // If token is provided then you don't need to login
+        bearer_token
+    } else {
+        // Ask for login and password if not provided in args
+        let login = conf.login.unwrap_or_else(|| readln("Login ->\t"));
+        let password = conf.password.unwrap_or_else(|| readln("Password ->\t"));
+
+        println!("\n> Logging in {} {}", login, password);
+        ebis_api::auth::gos_login(&login, &password).await?
+    };
+
     println!("\n----< Logged in >----\n");
 
     println!("> Getting student id");
     let id = student_id(&bearer).await?;
 
-    println!("> Getting years\n");
-    let years = year_ids(&id, &bearer).await?;
+    let year = if let Some(y) = conf.year {
+        y
+    } else {
+        // Provide choice if no year in args
+        println!("> Getting years\n");
+        let years = year_ids(&id, &bearer).await?;
 
-    println!("Which year to get info for?");
-    for (i, y) in years.iter().enumerate() {
-        println!("{}. {}", i, y);
-    }
+        println!("Which year to get info for?");
+        for (i, y) in years.iter().enumerate() {
+            println!("{}. {}", i, y);
+        }
 
-    let year_choice: usize = readln("\n->\t")
-        .parse()
-        .expect("Choose like a normal person");
+        let year_choice: usize = readln("\n->\t")
+            .parse()
+            .expect("Choose like a normal person");
 
-    let year = years.get(year_choice).expect("Choose like a normal person");
+        years
+            .get(year_choice)
+            .expect("Choose like a normal person")
+            .to_string()
+    };
 
     println!("> Getting class id");
     let class = calss_id(&id, &year, &bearer).await?;
@@ -45,19 +65,17 @@ async fn main() -> Result<(), ParseOrReqError> {
 
     // Print out all possible periods and ask what to show
     println!("What period would you like to get grades for?\n");
-    for i in 0..5 {
-        println!("{}. {}", i, ebis_lib::diary::Periods::from(i).as_str());
+    for (i, p) in periods.iter().enumerate() {
+        println!("{}. {}", i, p.0);
     }
 
-    let period_choice: i32 = readln("\n->\t")
+    let period_choice: usize = readln("\n->\t")
         .parse()
         .expect("Choose like a normal person");
 
-    //This is stupid, i'll probably find a better solution later
     let period = periods
-        .iter()
-        .find(|p: &&(String, String)| p.0 == Periods::from(period_choice).as_str())
-        .expect("Something deeply fucked up happened")
+        .get(period_choice)
+        .expect("Choose like a normal person")
         .1
         .clone();
 
