@@ -3,7 +3,6 @@ use std::{env::Args, io::Write};
 #[derive(Debug)]
 pub struct Config {
     pub verbose: bool,
-    pub credentials_path: Option<String>,
     pub login: Option<String>,
     pub password: Option<String>,
     pub year: Option<String>,
@@ -22,7 +21,6 @@ impl From<Args> for Config {
 
         Config {
             verbose: args.iter().any(|a| a == "-v"),
-            credentials_path: get_argument_value(&args, "-f"),
             login: get_argument_value(&args, "-l"),
             password: get_argument_value(&args, "-p"),
             year: get_argument_value(&args, "-y"),

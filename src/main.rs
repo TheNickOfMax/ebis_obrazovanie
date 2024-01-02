@@ -1,5 +1,3 @@
-use std::env;
-
 use crate::{
     ebis_api::requests::{calss_id, lessons_table, period_ids, student_id, year_ids},
     ebis_lib::errors::ParseOrReqError,
@@ -7,6 +5,7 @@ use crate::{
 };
 
 use prettytable::{row, Table};
+use std::env;
 
 mod ebis_api;
 mod ebis_lib;
@@ -16,7 +15,7 @@ mod input;
 async fn main() -> Result<(), ParseOrReqError> {
     let conf = Config::from(env::args());
 
-    log_if(&format!("{:#?}\n", conf), conf.verbose.clone());
+    log_if(&format!("\n{:#?}\n", conf), conf.verbose.clone());
 
     let bearer = if let Some(bearer_token) = conf.bearer_token {
         // If token is provided then you don't need to login
@@ -42,7 +41,7 @@ async fn main() -> Result<(), ParseOrReqError> {
         log_if("> Getting years", conf.verbose.clone());
         let years = year_ids(&id, &bearer).await?;
 
-        println!("Which year to get info for?");
+        println!("\nWhich year?");
         for (i, y) in years.iter().enumerate() {
             println!("{}. {}", i, y);
         }
@@ -62,12 +61,10 @@ async fn main() -> Result<(), ParseOrReqError> {
 
     log_if("> Getting period ids", conf.verbose.clone());
     let periods = period_ids(&id, &year, &class, &bearer).await?;
-    let mut exit: bool = true;
-
-    //-------------------------------------------------------------------------------------------------------------------------
-    while exit {
+    //-----------------------------------------------Main loop-------------------------------------------------------------
+    loop {
         // Print out all possible periods and ask what to show
-        println!("What period would you like to get grades for?\n");
+        println!("\nWhich period?");
         for (i, p) in periods.iter().enumerate() {
             println!("{}. {}", i, p.0);
         }
@@ -106,12 +103,14 @@ async fn main() -> Result<(), ParseOrReqError> {
             pretty.add_row(row![p.0, grd, p.2, p.3]);
         }
         println!("{}", pretty.to_string());
-        let x: &str = &readln("exit? (y/n) ->\t");
+        let x: &str = &readln("Exit? (Y/n) ->\t");
 
         match x {
-            "y" => exit = false,
-            "n" => exit = true,
-            _ => exit = true,
+            "y" => break,
+            "Y" => break,
+            "n" => continue,
+            "N" => continue,
+            _ => break,
         }
     }
     //-------------------------------------------------------------------------------------------------------------------------
