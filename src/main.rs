@@ -26,20 +26,38 @@ async fn main() -> Result<(), ParseOrReqError> {
         let password = conf.password.unwrap_or_else(|| readln("Password ->\t"));
 
         log_if("\n> Logging in", conf.verbose.clone());
-        ebis_api::auth::gos_login(&login, &password).await?
+        match ebis_api::auth::gos_login(&login, &password).await {
+            Ok(token) => token,
+            Err(err) => {
+                println!("Error during login");
+                return Err(err);
+            }
+        }
     };
 
     log_if("\n-----<Logged in>-----\n", conf.verbose.clone());
 
     log_if("> Getting student id", conf.verbose.clone());
-    let id = student_id(&bearer).await?;
+    let id = match student_id(&bearer).await {
+        Ok(student_id) => student_id,
+        Err(err) => {
+            println!("Error getting student id");
+            return Err(err);
+        }
+    };
 
     let year = if let Some(y) = conf.year {
         y
     } else {
         // Provide choice if no year in args
         log_if("> Getting years", conf.verbose.clone());
-        let years = year_ids(&id, &bearer).await?;
+        let years = match year_ids(&id, &bearer).await {
+            Ok(years) => years,
+            Err(err) => {
+                println!("Error getting years");
+                return Err(err);
+            }
+        };
 
         println!("\nWhich year?");
         for (i, y) in years.iter().enumerate() {
@@ -57,10 +75,23 @@ async fn main() -> Result<(), ParseOrReqError> {
     };
 
     log_if("> Getting class id", conf.verbose.clone());
-    let class = calss_id(&id, &year, &bearer).await?;
+    let class = match calss_id(&id, &year, &bearer).await {
+        Ok(class_id) => class_id,
+        Err(err) => {
+            println!("Error getting class id");
+            return Err(err);
+        }
+    };
 
     log_if("> Getting period ids", conf.verbose.clone());
-    let periods = period_ids(&id, &year, &class, &bearer).await?;
+    let periods = match period_ids(&id, &year, &class, &bearer).await {
+        Ok(periods) => periods,
+        Err(err) => {
+            println!("Error getting period ids");
+            return Err(err);
+        }
+    };
+
     //-----------------------------------------------Main loop-------------------------------------------------------------
     loop {
         // Print out all possible periods and ask what to show
@@ -81,7 +112,13 @@ async fn main() -> Result<(), ParseOrReqError> {
 
         // Request the grades
         log_if("> Getting grades", conf.verbose.clone());
-        let disciplines = lessons_table(&year, &class, &period, &id, &bearer).await?;
+        let disciplines = match lessons_table(&year, &class, &period, &id, &bearer).await {
+            Ok(disciplines) => disciplines,
+            Err(err) => {
+                println!("Error getting grades");
+                return Err(err);
+            }
+        };
 
         // Leave only valid grades
         let table: Vec<(String, Vec<i8>, f32, String)> = disciplines
@@ -106,17 +143,17 @@ async fn main() -> Result<(), ParseOrReqError> {
         let x: &str = &readln("Exit? (Y/n) ->\t");
 
         match x {
-            "y" => break,
-            "Y" => break,
-            "n" => continue,
-            "N" => continue,
+            "y" | "Y" => break,
+            "n" | "N" => continue,
             _ => break,
         }
     }
     //-------------------------------------------------------------------------------------------------------------------------
     // Revoke the token
     log_if("> Revoking token", conf.verbose.clone());
-    _ = ebis_api::auth::revoke_token(&bearer);
+    if let Err(_) = ebis_api::auth::revoke_token(&bearer).await {
+        println!("Error revoking token");
+    }
 
     Ok(())
 }
