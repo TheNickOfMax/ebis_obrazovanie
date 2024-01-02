@@ -16,7 +16,7 @@ mod input;
 async fn main() -> Result<(), ParseOrReqError> {
     let conf = Config::from(env::args());
 
-    println!("{:#?}", conf);
+    log_if(&format!("{:#?}\n", conf), conf.verbose.clone());
 
     let bearer = if let Some(bearer_token) = conf.bearer_token {
         // If token is provided then you don't need to login
@@ -26,20 +26,20 @@ async fn main() -> Result<(), ParseOrReqError> {
         let login = conf.login.unwrap_or_else(|| readln("Login ->\t"));
         let password = conf.password.unwrap_or_else(|| readln("Password ->\t"));
 
-        println!("\n> Logging in {} {}", login, password);
+        log_if("\n> Logging in", conf.verbose.clone());
         ebis_api::auth::gos_login(&login, &password).await?
     };
 
-    println!("\n----< Logged in >----\n");
+    log_if("\n-----<Logged in>-----\n", conf.verbose.clone());
 
-    println!("> Getting student id");
+    log_if("> Getting student id", conf.verbose.clone());
     let id = student_id(&bearer).await?;
 
     let year = if let Some(y) = conf.year {
         y
     } else {
         // Provide choice if no year in args
-        println!("> Getting years\n");
+        log_if("> Getting years", conf.verbose.clone());
         let years = year_ids(&id, &bearer).await?;
 
         println!("Which year to get info for?");
@@ -57,10 +57,10 @@ async fn main() -> Result<(), ParseOrReqError> {
             .to_string()
     };
 
-    println!("> Getting class id");
+    log_if("> Getting class id", conf.verbose.clone());
     let class = calss_id(&id, &year, &bearer).await?;
 
-    println!("> Getting period ids\n");
+    log_if("> Getting period ids", conf.verbose.clone());
     let periods = period_ids(&id, &year, &class, &bearer).await?;
 
     // Print out all possible periods and ask what to show
@@ -80,7 +80,7 @@ async fn main() -> Result<(), ParseOrReqError> {
         .clone();
 
     // Request the grades
-    println!("\n> Getting grades for that period\n");
+    log_if("> Getting grades", conf.verbose.clone());
     let disciplines = lessons_table(&year, &class, &period, &id, &bearer).await?;
 
     // Leave only valid grades
@@ -105,11 +105,17 @@ async fn main() -> Result<(), ParseOrReqError> {
     println!("{}", pretty.to_string());
 
     // Revoke the token
-    println!("> Revoking token");
+    log_if("> Revoking token", conf.verbose.clone());
     _ = ebis_api::auth::revoke_token(&bearer);
 
     // Wait for input to exit
     _ = readln("\nPress enter to exit");
 
     Ok(())
+}
+
+fn log_if(s: &str, b: bool) {
+    if b {
+        println!("{}", s)
+    }
 }
