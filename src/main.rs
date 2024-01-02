@@ -5,7 +5,11 @@ use crate::{
 };
 
 use prettytable::{row, Table};
-use std::env;
+use std::{
+    env,
+    fmt::{Debug, Display},
+    future::Future,
+};
 
 mod ebis_api;
 mod ebis_lib;
@@ -49,7 +53,6 @@ async fn main() -> Result<(), ParseOrReqError> {
     let year = if let Some(y) = conf.year {
         y
     } else {
-        // Provide choice if no year in args
         log_if("> Getting years", conf.verbose.clone());
         let years = match year_ids(&id, &bearer).await {
             Ok(years) => years,
@@ -59,19 +62,7 @@ async fn main() -> Result<(), ParseOrReqError> {
             }
         };
 
-        println!("\nWhich year?");
-        for (i, y) in years.iter().enumerate() {
-            println!("{}. {}", i, y);
-        }
-
-        let year_choice: usize = readln("\n->\t")
-            .parse()
-            .expect("Choose like a normal person");
-
-        years
-            .get(year_choice)
-            .expect("Choose like a normal person")
-            .to_string()
+        choose_from_list("Which year?", &years)
     };
 
     log_if("> Getting class id", conf.verbose.clone());
@@ -95,20 +86,7 @@ async fn main() -> Result<(), ParseOrReqError> {
     //-----------------------------------------------Main loop-------------------------------------------------------------
     loop {
         // Print out all possible periods and ask what to show
-        println!("\nWhich period?");
-        for (i, p) in periods.iter().enumerate() {
-            println!("{}. {}", i, p.0);
-        }
-
-        let period_choice: usize = readln("\n->\t")
-            .parse()
-            .expect("Choose like a normal person");
-
-        let period = periods
-            .get(period_choice)
-            .expect("Choose like a normal person")
-            .1
-            .clone();
+        let period = choose_from_list("Which period?", &periods).1;
 
         // Request the grades
         log_if("> Getting grades", conf.verbose.clone());
@@ -156,6 +134,28 @@ async fn main() -> Result<(), ParseOrReqError> {
     }
 
     Ok(())
+}
+
+fn choose_from_list<T>(prompt: &str, options: &Vec<T>) -> T
+where
+    T: Debug,
+    T: Clone,
+{
+    println!("\n{}", prompt);
+    for (i, option) in options.iter().enumerate() {
+        println!("{}. {:?}", i, option);
+    }
+
+    let choice: usize = readln("\n->\t")
+        .parse()
+        .expect("Choose like a normal person");
+
+    let chosen: T = options
+        .get(choice)
+        .cloned()
+        .expect("Choose like a normal person");
+
+    chosen
 }
 
 fn log_if(s: &str, b: bool) {
