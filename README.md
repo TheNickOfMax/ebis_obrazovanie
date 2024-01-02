@@ -1,6 +1,6 @@
 # Ebis Obrazovanie
 A custom frontend for https://dnevnik.egov66.ru written in Rust. I had to make it because their website is shit.
-I'm currently trying to find a way to integrate with their dumb Gosusugi bearer auth.
+Mostly finished, I have all the features I need, if you want you can make it into something actually useful.
 
 ## Contributing
-Just go nuts, also would appreciate any documentation whatsoever.
+Just go nuts, will appreciate any contribution whatsoever. No one cares anyway.
